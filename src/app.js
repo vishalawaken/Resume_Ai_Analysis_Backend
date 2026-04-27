@@ -6,10 +6,20 @@ const app = express()
 
 app.use(express.json())
 app.use(cookieParser())
-const allowedOrigins = [process.env.FRONTEND_URL || "http://localhost:5173"]
+
+const allowedOrigins = (process.env.FRONTEND_URL || "http://localhost:5173").replace(/\/$/, "")
+
 app.use(cors({
-    origin: allowedOrigins,
-    credentials: true
+    origin: function (origin, callback) {
+        if (!origin || origin === allowedOrigins) {
+            callback(null, true)
+        } else {
+            callback(new Error("CORS not allowed"))
+        }
+    },
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"]
 }))
 
 /* require all the routes here */
